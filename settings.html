@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Wake Word Settings</title>
+</head>
+<body>
+  <h2>Wake Word Settings</h2>
+  <label>Doctor ID:</label>
+  <input type="text" id="doctor_id"><br><br>
+  <label>Set Wake Word:</label>
+  <input type="text" id="wake_word"><br><br>
+  <button onclick="updateWakeWord()">Save</button>
+
+  <p id="status"></p>
+
+  <script>
+    async function updateWakeWord() {
+      const doctor_id = document.getElementById("doctor_id").value;
+      const wake_word = document.getElementById("wake_word").value;
+
+      const res = await fetch("http://127.0.0.1:5000/set_wake_word", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ doctor_id, wake_word })
+      });
+      const data = await res.json();
+      document.getElementById("status").innerText = data.status || data.error;
+    }
+  </script>
+</body>
+</html>

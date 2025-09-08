@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare Login Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase JS SDKs (Compat version) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <style>
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-family: 'Arial', sans-serif; }
+        .container { animation: fadeIn 1s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        .login-card { box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); border-radius: 15px; }
+        .btn-primary { background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%); transition: transform 0.2s ease; }
+        .btn-primary:hover { transform: scale(1.05);}
+        .btn-google { background: linear-gradient(90deg, #dd4b39 0%, #c23321 100%); transition: transform 0.2s ease;}
+        .btn-google:hover {transform: scale(1.05);}
+        .tab-active { background-color: #4facfe; color: white; border-radius: 10px 10px 0 0; }
+        .hero-section { position: relative; overflow: hidden;}
+        .hero-section img { width: 100%; height: auto; max-height: 200px; object-fit: cover; filter: brightness(0.7);}
+        .hero-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);}
+        #userDetails { margin-top: 10px; padding: 10px; background: #e0ffe0; border-radius: 6px; color: #197278; text-align: center;}
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="container max-w-lg w-full mx-auto">
+        <!-- Hero Image Section -->
+        <div class="hero-section mb-6">
+            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/e8b63336-0e2e-4f70-8fda-f820fbdd60e7.png" alt="Serene healthcare facility" />
+            <div class="hero-text text-center">
+                <h1 class="text-2xl font-bold">Welcome to Healthcare Portal</h1>
+                <p class="text-lg">Secure Login for Patients and Doctors</p>
+            </div>
+        </div>
+        <!-- Login Card -->
+        <div class="bg-white login-card p-8">
+            <h2 class="text-3xl font-semibold text-gray-800 text-center mb-6">Login to Your Account</h2>
+            <!-- User Type Selection -->
+            <div class="flex justify-center mb-6">
+                <button id="patientTab" class="tab-active px-6 py-3 text-sm font-medium">Patient Login</button>
+                <button id="doctorTab" class="px-6 py-3 text-sm font-medium text-gray-600 hover:text-blue-500">Doctor Login</button>
+            </div>
+            <!-- Login Form -->
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email or Username</label>
+                    <input type="text" id="email" name="email" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-300" placeholder="Enter your email or username">
+                </div>
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="password" name="password" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-300" placeholder="Enter your password">
+                </div>
+                <!-- Login Method Toggle -->
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-600">Login with</span>
+                    <div id="methodToggle">
+                        <input type="radio" id="details" name="loginMethod" value="details" checked>
+                        <label for="details" class="cursor-pointer text-sm text-blue-600 mr-4">Details</label>
+                        <input type="radio" id="gmail" name="loginMethod" value="gmail">
+                        <label for="gmail" class="cursor-pointer text-sm text-blue-600">Gmail</label>
+                    </div>
+                </div>
+                <!-- Gmail Integration -->
+                <div id="gmailSection" class="hidden">
+                    <button type="button" id="gmailButton" class="w-full btn-google text-white py-3 px-4 rounded-lg font-semibold flex items-center justify-center">
+                        <span class="mr-2">G</span>
+                        Continue with Google
+                    </button>
+                    <p class="text-xs text-gray-500 mt-2">Note: Sign in securely with Google.</p>
+                </div>
+                <div id="detailsSection">
+                    <button type="submit" class="w-full btn-primary text-white py-3 px-4 rounded-lg font-semibold">Sign In</button>
+                </div>
+                <div class="flex items-center justify-between text-sm">
+                    <a href="#" class="text-blue-600 hover:text-blue-800">Forgot Password?</a>
+                    <a href="#" class="text-blue-600 hover:text-blue-800">Create Account</a>
+                </div>
+            </form>
+            <div id="error" class="text-red-500 mt-2"></div>
+            <div id="userDetails" style="display:none"></div>
+        </div>
+    </div>
+    <script>
+        // ---------------- Firebase Config ----------------
+        const firebaseConfig = {
+            apiKey: "AIzaSyCMEBt6W48R7wjptlu32eq13PzGIcolHhQ",
+            authDomain: "batrale-chat-ff0c6.firebaseapp.com",
+            databaseURL: "https://batrale-chat-ff0c6-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "batrale-chat-ff0c6",
+            storageBucket: "batrale-chat-ff0c6.appspot.com", // FIXED ".appspot.com"
+            messagingSenderId: "719296835495",
+            appId: "1:719296835495:web:862210d5c11e279ae9d082",
+            measurementId: "G-9NDQ3ZR4W1"
+        };
+
+        // Initialize Firebase (Compat SDK)
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const provider = new firebase.auth.GoogleAuthProvider();
+
+        // Tab switching for Patient/Doctor
+        const patientTab = document.getElementById('patientTab');
+        const doctorTab = document.getElementById('doctorTab');
+        const methodToggle = document.getElementById('methodToggle');
+        const detailsSection = document.getElementById('detailsSection');
+        const gmailSection = document.getElementById('gmailSection');
+        const loginForm = document.getElementById('loginForm');
+        const gmailButton = document.getElementById('gmailButton');
+        const errorDiv = document.getElementById('error');
+        const userDetailsDiv = document.getElementById('userDetails');
+
+        patientTab.addEventListener('click', () => {
+            patientTab.classList.add('tab-active');
+            doctorTab.classList.remove('tab-active');
+            doctorTab.classList.add('text-gray-600');
+        });
+        doctorTab.addEventListener('click', () => {
+            doctorTab.classList.add('tab-active');
+            patientTab.classList.remove('tab-active');
+            patientTab.classList.add('text-gray-600');
+        });
+
+        document.getElementById('details').addEventListener('change', () => {
+            detailsSection.classList.remove('hidden');
+            gmailSection.classList.add('hidden');
+        });
+        document.getElementById('gmail').addEventListener('change', () => {
+            gmailSection.classList.remove('hidden');
+            detailsSection.classList.add('hidden');
+        });
+
+        // Details login
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            errorDiv.textContent = '';
+            userDetailsDiv.style.display = 'none';
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const userType = patientTab.classList.contains('tab-active') ? 'Patient' : 'Doctor';
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    userDetailsDiv.style.display = 'block';
+                    userDetailsDiv.textContent = `Logged in as ${email} (${userType})`;
+                })
+                .catch((error) => {
+                    errorDiv.textContent = error.message;
+                });
+        });
+
+        // Google login
+        gmailButton.addEventListener('click', () => {
+            errorDiv.textContent = '';
+            userDetailsDiv.style.display = 'none';
+            const userType = patientTab.classList.contains('tab-active') ? 'Patient' : 'Doctor';
+            auth.signInWithPopup(provider)
+                .then((result) => {
+                    const user = result.user;
+                    userDetailsDiv.style.display = 'block';
+                    userDetailsDiv.textContent = `Google login success: ${user.displayName}, ${user.email} (${userType})`;
+                })
+                .catch((error) => {
+                    errorDiv.textContent = error.message;
+                });
+        });
+    </script>
+</body>
+</html>
