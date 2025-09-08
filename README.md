@@ -42,15 +42,6 @@
 
 ---
 
-📂 Project Structure
-NeuroMed-Ai/
-│── app.py              # Flask backend
-│── dashboard.html      # Doctor's dashboard
-│── Patient.html        # Patient dashboard
-│── settings.html       # Wake word settings
-│── login.html          # Login page
----
-
 ## 🚀 Getting Started
 
 ### Prerequisites
