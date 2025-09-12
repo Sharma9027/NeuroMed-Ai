@@ -36,7 +36,7 @@
 ## 🛠 Tech Stack
 - **Backend**: Python (Flask, MySQL, CORS)
 - 
-- **Frontend**: HTML, CSS, Tailwind, JavaScript  
+- **Frontend**: HTML, CSS, JavaScript  
 - **Database**: MySQL  
 - **AI Integration**: In-dashboard assistant  
 
@@ -45,7 +45,7 @@
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Python 3.8+  
+- Python 3.11+  
 - MySQL Server  
 
 ### Installation
