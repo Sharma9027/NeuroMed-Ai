@@ -35,7 +35,6 @@
 
 ## 🛠 Tech Stack
 - **Backend**: Python (Flask, MySQL, CORS)
-- 
 - **Frontend**: HTML, CSS, JavaScript  
 - **Database**: MySQL  
 - **AI Integration**: In-dashboard assistant  
